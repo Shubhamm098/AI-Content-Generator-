@@ -13,3 +13,4 @@ class BrandState(TypedDict):
     # The reducer (operator.add) means each node returns ONLY its new log
     # lines and LangGraph appends them, instead of overwriting the list.
     execution_log: Annotated[List[str], operator.add]
+    
