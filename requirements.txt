@@ -3,4 +3,6 @@ langchain-core
 langchain-groq
 python-dotenv
 pydantic
-python-dotenv
+feedparser
+httpx
+langgraph-checkpoint-sqlite

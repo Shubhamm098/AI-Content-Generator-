@@ -1,4 +1,7 @@
-from langgraph.checkpoint.memory import MemorySaver
+import os
+import sqlite3
+
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
 from graph.nodes import (
@@ -21,7 +24,7 @@ def route_after_human(state: BrandState) -> str:
     return "publisher" if state["human_approval"] == "APPROVED" else END
 
 
-def build_graph():
+def build_graph(db_path: str | None = None):
     g = StateGraph(BrandState)
 
     g.add_node("radar", node_culture_radar)
@@ -41,5 +44,9 @@ def build_graph():
     g.add_conditional_edges("human_gate", route_after_human, {"publisher": "publisher", END: END})
     g.add_edge("publisher", END)
 
-    # interrupt() requires a checkpointer. MemorySaver = in-memory (swap for SqliteSaver later).
-    return g.compile(checkpointer=MemorySaver())
+    # Persistent checkpointer: paused runs survive closing the terminal.
+    # Tip: if your project lives in a OneDrive folder, point CHECKPOINT_DB at a
+    # non-synced path (e.g. C:\\Users\\<you>\\living_brand.db) to avoid file-lock issues.
+    path = db_path or os.getenv("CHECKPOINT_DB", "checkpoints.db")
+    conn = sqlite3.connect(path, check_same_thread=False)
+    return g.compile(checkpointer=SqliteSaver(conn))
