@@ -6,3 +6,4 @@ pydantic
 feedparser
 httpx
 langgraph-checkpoint-sqlite
+mcp
